@@ -3,6 +3,7 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.Employee;
 import org.example.repository.EmployeeRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class EmployeeService {
     // into the Employee-Service as well so it can access the database!
     private final EmployeeRepository employeeRepository;
 
+    @Cacheable(value = "employees") // This tells Spring to save the result in Redis!
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
