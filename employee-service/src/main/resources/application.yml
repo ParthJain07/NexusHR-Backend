@@ -1,0 +1,21 @@
+server:
+  port: 8081 # Auth service will run on 8080, Employee service on 8081
+
+spring:
+  application:
+    name: employee-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nexushr_db
+    username: postgres
+    password: admin123 # Matches what you set earlier!
+  jpa:
+    hibernate:
+      ddl-auto: validate # Flyway handles table creation, not Hibernate
+    show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
