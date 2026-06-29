@@ -1,11 +1,13 @@
 package org.example.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 @Data
@@ -14,7 +16,10 @@ import java.util.Collection;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class UserAuth implements UserDetails {
+public class UserAuth implements UserDetails, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,6 +27,7 @@ public class UserAuth implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore // Protects hashed password from leaking in API responses or JSON serialization!
     @Column(nullable = false)
     private String password;
 
