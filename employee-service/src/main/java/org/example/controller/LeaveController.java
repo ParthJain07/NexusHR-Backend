@@ -19,6 +19,7 @@ public class LeaveController {
 
     // Any logged in employee can submit a request
     @PostMapping("/request")
+    @PreAuthorize("hasAuthority('APPLY_LEAVE')")
     public ResponseEntity<String> submitLeave(@RequestBody LeaveRequestDto request) {
         return ResponseEntity.ok(leaveService.submitLeaveRequest(request));
     }
@@ -38,7 +39,7 @@ public class LeaveController {
 
     // ONLY HR/Admin can approve or reject
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ROLE_HR', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('APPROVE_LEAVE')")
     public ResponseEntity<String> updateStatus(@PathVariable Long id, @RequestParam String status) {
         // e.g. /api/leaves/1/status?status=APPROVED
         return ResponseEntity.ok(leaveService.updateLeaveStatus(id, status));

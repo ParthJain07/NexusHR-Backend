@@ -5,8 +5,10 @@ import org.example.dto.AuthResponse;
 import org.example.dto.LoginRequest;
 import org.example.dto.SignupRequest;
 import org.example.entity.Employee;
+import org.example.entity.UserAuth;
 import org.example.enums.Role;
 import org.example.repository.EmployeeRepository;
+import org.example.repository.UserAuthRepository;
 import org.example.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,29 +18,36 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final EmployeeRepository employeeRepository;
+    private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     public AuthResponse signup(SignupRequest request) {
-        if (employeeRepository.existsByEmail(request.getEmail())) {
+        if (userAuthRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists!");
         }
 
-        // Create new employee and hash the password using Argon2
+
         Employee employee = Employee.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ROLE_EMPLOYEE) // Default role
                 .department(request.getDepartment())
                 .designation(request.getDesignation())
                 .build();
+        employee = employeeRepository.save(employee);
 
-        employeeRepository.save(employee);
 
-        // Generate JWT Token
-        String token = jwtUtil.generateToken(employee.getEmail(), employee.getRole().name());
+        UserAuth userAuth = UserAuth.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.ROLE_EMPLOYEE) // Default role
+                .employee(employee)
+                .build();
+        userAuthRepository.save(userAuth);
+
+
+        String token = jwtUtil.generateToken(userAuth.getEmail(), userAuth.getRole().name());
 
         return AuthResponse.builder()
                 .token(token)
@@ -47,16 +56,17 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        Employee employee = employeeRepository.findByEmail(request.getEmail())
+
+        UserAuth userAuth = userAuthRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
-        // Verify the Argon2 hashed password
-        if (!passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
+        // Verify hashed password
+        if (!passwordEncoder.matches(request.getPassword(), userAuth.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Generate JWT Token
-        String token = jwtUtil.generateToken(employee.getEmail(), employee.getRole().name());
+
+        String token = jwtUtil.generateToken(userAuth.getEmail(), userAuth.getRole().name());
 
         return AuthResponse.builder()
                 .token(token)
