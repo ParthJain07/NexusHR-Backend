@@ -28,8 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-
-        // If there is no token, or it doesn't start with "Bearer ", move on to the next filter
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -44,20 +42,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = claims.getSubject();
                 String role = claims.get("role", String.class);
 
-                // Create the authentication object representing the logged-in user
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email,
+                String roleName = claims.get("role", String.class);
+                org.example.enums.Role roleEnum = org.example.enums.Role.valueOf(roleName);
+
+
+                UsernamePasswordAuthenticationToken authToken = new
+                        UsernamePasswordAuthenticationToken( email,
                         null,
-                        List.of(new SimpleGrantedAuthority(role))
-                );
+                        roleEnum.getAuthorities());
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Save the user in the Spring Security Context
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
-            // If token is expired or invalid, we simply don't authenticate them
         }
 
         filterChain.doFilter(request, response);

@@ -35,14 +35,46 @@ This document contains all the endpoints necessary to validate the current backe
 
 ## 2. Employee Service (Port: 8081)
 
-### Get All Employees
+### Get All Employees (Requires ADMIN, HR, or MANAGER Role)
 * **URL:** `GET http://localhost:8081/api/employees`
-* **Note:** This endpoint is cached via Redis for instant retrieval.
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
+* **Note:** This endpoint is cached via Redis for instant retrieval. Restricted to managers and administrative roles.
 
 ### Get Employee By ID
 * **URL:** `GET http://localhost:8081/api/employees/{id}`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
+* **Note:** Accessible by ADMIN, HR, MANAGER, or the employee viewing their own profile (`VIEW_EMPLOYEE` authority).
 
-### Delete Employee (Requires HR/Admin Role)
+### Create Employee (Requires CREATE_EMPLOYEE Authority)
+* **URL:** `POST http://localhost:8081/api/employees`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
+* **Body (JSON):**
+  ```json
+  {
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "email": "alice.smith@zidio.in",
+      "department": "Human Resources",
+      "designation": "HR Manager",
+      "joiningDate": "2026-06-29"
+  }
+  ```
+
+### Update Employee (Requires UPDATE_EMPLOYEE Authority)
+* **URL:** `PUT http://localhost:8081/api/employees/{id}`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
+* **Body (JSON):**
+  ```json
+  {
+      "firstName": "Alice",
+      "lastName": "Smith-Johnson",
+      "email": "alice.smith@zidio.in",
+      "department": "Human Resources",
+      "designation": "Senior HR Manager"
+  }
+  ```
+
+### Delete Employee (Requires ADMIN Role / DELETE_EMPLOYEE Authority)
 * **URL:** `DELETE http://localhost:8081/api/employees/{id}`
 * **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 
@@ -52,6 +84,7 @@ This document contains all the endpoints necessary to validate the current backe
 
 ### Clock In
 * **URL:** `POST http://localhost:8081/api/attendance/clock-in`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 * **Body (JSON):**
   ```json
   {
@@ -61,6 +94,7 @@ This document contains all the endpoints necessary to validate the current backe
 
 ### Clock Out
 * **URL:** `POST http://localhost:8081/api/attendance/clock-out`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 * **Body (JSON):**
   ```json
   {
@@ -70,13 +104,15 @@ This document contains all the endpoints necessary to validate the current backe
 
 ### View Attendance History
 * **URL:** `GET http://localhost:8081/api/attendance/{employeeId}`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 
 ---
 
 ## 4. Leave Management (Port: 8081)
 
-### Submit a Leave Request
+### Submit a Leave Request (Requires APPLY_LEAVE Authority)
 * **URL:** `POST http://localhost:8081/api/leaves/request`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 * **Body (JSON):**
   ```json
   {
@@ -92,6 +128,6 @@ This document contains all the endpoints necessary to validate the current backe
 * **URL:** `GET http://localhost:8081/api/leaves/pending`
 * **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 
-### Approve/Reject a Leave Request (Requires HR/Admin Role)
+### Approve/Reject a Leave Request (Requires APPROVE_LEAVE Authority)
 * **URL:** `PUT http://localhost:8081/api/leaves/{leaveId}/status?status=APPROVED`
 * **Headers:** `Authorization: Bearer <Your_JWT_Token>`

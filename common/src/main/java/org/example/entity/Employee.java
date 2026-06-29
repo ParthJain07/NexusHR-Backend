@@ -2,7 +2,6 @@ package org.example.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.enums.Role;
 
 import java.time.LocalDate;
 
@@ -23,21 +22,16 @@ public class Employee {
     private String email;
 
     @Column(nullable = false)
-    private String password; // Stores the secure Argon2 hash
-
-    @Column(nullable = false)
     private String firstName;
 
     @Column(nullable = false)
     private String lastName;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
     private String department;
-
     private String designation;
-
     private LocalDate joiningDate;
+
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL)
+    private UserAuth userAuth;
+
+
 }

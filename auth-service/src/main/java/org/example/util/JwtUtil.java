@@ -11,8 +11,6 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // IMPORTANT: In a real production app, this secret should be injected from environment variables!
-    // It must be at least 256 bits (32 characters) long.
     private final String SECRET_KEY = "zidio_development_nexus_hr_super_secret_key_2026!";
 
     // Token valid for 24 hours
