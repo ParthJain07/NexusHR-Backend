@@ -1,7 +1,9 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.dto.CreateEmployeeRequest;
 import org.example.entity.Employee;
+import org.example.enums.Role;
 import org.example.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,17 +24,25 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    // Only Admin and HR can view a specific employee's full details, or the employee viewing themselves
     @PreAuthorize("hasRole('ADMIN') or hasRole('HR') or hasRole('MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
+    // Creates employee profile AND assigns dynamic role + login credentials
     @PostMapping
     @PreAuthorize("hasAuthority('CREATE_EMPLOYEE')")
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
-        return ResponseEntity.ok(employeeService.createEmployee(employee));
+    public ResponseEntity<Employee> createEmployee(@RequestBody CreateEmployeeRequest request) {
+        return ResponseEntity.ok(employeeService.createEmployeeWithRole(request));
+    }
+
+    // Allows Admin or HR to promote / reassign anyone's role
+    @PutMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
+    public ResponseEntity<String> assignRole(@PathVariable Long id, @RequestParam Role role) {
+        employeeService.assignRoleToEmployee(id, role);
+        return ResponseEntity.ok("Successfully updated employee role to " + role);
     }
 
     @PutMapping("/{id}")
@@ -41,7 +51,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.updateEmployee(id, employee));
     }
 
-    // Only an ADMIN is allowed to delete an employee!
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {

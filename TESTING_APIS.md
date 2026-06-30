@@ -45,20 +45,28 @@ This document contains all the endpoints necessary to validate the current backe
 * **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 * **Note:** Accessible by ADMIN, HR, MANAGER, or the employee viewing their own profile (`VIEW_EMPLOYEE` authority).
 
-### Create Employee (Requires CREATE_EMPLOYEE Authority)
+### Create Employee with Dynamic Role (Requires CREATE_EMPLOYEE Authority)
 * **URL:** `POST http://localhost:8081/api/employees`
 * **Headers:** `Authorization: Bearer <Your_JWT_Token>`
 * **Body (JSON):**
   ```json
   {
-      "firstName": "Alice",
-      "lastName": "Smith",
-      "email": "alice.smith@zidio.in",
+      "firstName": "Siddharth",
+      "lastName": "Malhotra",
+      "email": "sid.malhotra@zidio.in",
       "department": "Human Resources",
       "designation": "HR Manager",
-      "joiningDate": "2026-06-29"
+      "joiningDate": "2026-06-29",
+      "role": "ROLE_HR",
+      "password": "SecurePassword123"
   }
   ```
+* **Note:** This automatically creates the employee profile AND generates their login account with the specified role (`ROLE_EMPLOYEE`, `ROLE_HR`, `ROLE_MANAGER`, `ROLE_ADMIN`). If `role` or `password` are omitted, they default to `ROLE_EMPLOYEE` and `Welcome@123`.
+
+### Assign / Promote Employee Role (Requires ADMIN or HR Role)
+* **URL:** `PUT http://localhost:8081/api/employees/{id}/role?role=ROLE_MANAGER`
+* **Headers:** `Authorization: Bearer <Your_JWT_Token>`
+* **Note:** Allows Admins and HR to promote or reassign any existing employee's login role dynamically.
 
 ### Update Employee (Requires UPDATE_EMPLOYEE Authority)
 * **URL:** `PUT http://localhost:8081/api/employees/{id}`
